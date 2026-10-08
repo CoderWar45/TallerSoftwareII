@@ -1,0 +1,23 @@
+from locust import HttpUser, task, between
+
+class LaravelLoadTestUser(HttpUser):
+    # Simula un tiempo de espera aleatorio entre 1 y 5 segundos por usuario
+    wait_time = between(1, 5)
+
+    @task
+    def test_bulk_store(self):
+        # El JSON exacto con la estructura 'users' que creamos antes
+        payload = {
+            "users": [
+                {
+                    "name": "Usuario Prueba 1",
+                    "email": "test1@loadtest.local",
+                    "birth_date": "1990-01-01",
+                    "password": "password"
+                }
+            ]
+        }
+        
+        # Enviamos la petición POST al endpoint de Laravel
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+        self.client.post("/api/users/bulk", json=payload, headers=headers)

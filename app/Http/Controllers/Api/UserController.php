@@ -13,21 +13,23 @@ class UserController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(User::all());
+        return response()->json(User::limit(10)->get(['id', 'email']));
     }
 
     public function emails(): JsonResponse
     {
-        return response()->json(User::all(['id', 'email']));
+        return response()->json(User::limit(10)->get(['id', 'email']));
     }
 
     public function overTwenty(): JsonResponse
     {
         $cutoff = Carbon::now()->subYears(20)->startOfDay();
 
-        $users = User::all()->filter(
-            fn (User $user) => $user->birth_date && $user->birth_date->lte($cutoff)
-        )->values();
+        $users = User::select('id', 'email', 'birth_date') 
+        ->whereNotNull('birth_date')
+        ->whereDate('birth_date', '<=', $cutoff)
+        ->limit(20)
+        ->get();
 
         return response()->json($users);
     }
